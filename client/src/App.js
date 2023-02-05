@@ -1,6 +1,8 @@
 import React from 'react'
 import {createBrowserRouter,RouterProvider} from "react-router-dom"
+
 //import pages
+// continue from 34:52
 import Login from './pages/Login';
 import Password from './pages/Password';
 import Profile from './pages/Profile';

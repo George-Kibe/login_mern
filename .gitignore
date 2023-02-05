@@ -7,6 +7,9 @@ server/node_modules
 server/.env
 client.env
 
+/test
+test/
+
 /.pnp
 .pnp.js
 
