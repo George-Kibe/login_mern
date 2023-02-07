@@ -1,5 +1,25 @@
 import UserModel from "../models/UserModel.js"
 import bcrypt from "bcrypt"
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+//Middleware for verify user
+export const VerifyUser = async (req, res, next) => {
+    try{
+        const {username} = req.method == "GET" ? req.query : req.body;
+        //check if user exists
+        let exist = await UserModel.findOne({username});
+        if(!exist) return res.status(404).send({error:"Cannot find user!"});
+        next()
+
+    }catch(error){
+        return res.status(404).send({error:"Authentication Error!"})
+    }
+}
+
+
 
 export const register= async (req, res) => {
     try{
@@ -27,8 +47,32 @@ export const register= async (req, res) => {
     }
 }
 
-export async function login(req, res){
-    res.json("Login route")
+export const login = async(req, res) =>{
+    const {username, password} = req.body;
+    try{
+        //find a user
+        const user = await UserModel.findOne({username})
+        if(!user){
+            return res.status(400).json({message:"Wrong Username and/or Password!"})
+        }
+        //validate password
+        const validPassword = await bcrypt.compare(password, user.password)
+        if(!validPassword){
+            return res.status(400).json("Wrong Username and/or Password!")
+        }
+        const secret = process.env.JWT_SECRET
+        //create jwt token
+        const token = jwt.sign({
+            userId:user._id,
+            username:user.username},
+            secret,
+            {expiresIn : "24h"}
+            )
+        //send response
+        res.status(200).json({_id:user.id, username:user.username, token,  message:"Logged in Successfully"});
+    }catch(error){
+        res.status(500).json(error)
+    }
 }
 export async function getUser(req, res){
     res.json("Get User route")
