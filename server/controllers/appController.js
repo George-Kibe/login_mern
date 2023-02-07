@@ -74,11 +74,37 @@ export const login = async(req, res) =>{
         res.status(500).json(error)
     }
 }
-export async function getUser(req, res){
-    res.json("Get User route")
+export const getUser= async(req, res) => {
+    const {username} = req.params;
+    try{
+        if(!username) return res.status(501).send({error:"Invalid Username!"})
+        const user = await UserModel.findOne({username})
+        if(!user) return res.status(500).send({error:"Couldn't find the user!"})
+        //remove password from response
+        const {password, ...otherUserAttributes} = Object.assign({}, user.toJSON())
+        return res.status(200).send(otherUserAttributes)
+
+    }catch(error){
+        return res.status(404).send({error: "Cannot find User Data!"})
+    }
 }
-export async function updateUser(req, res){
-    res.json("Update user route")
+export const updateUser= async (req, res) => {
+    try{
+        //const id = req.query.id;
+        const {userId} = req.user;
+
+        if(userId){
+            const body = req.body;
+            //update the user data
+            const updatedUser = await UserModel.updateOne({_id:userId}, body)
+            if(!updateUser) return res.status(500).send({error:"Error in Updating the User Details!"})
+            return res.status(201).send({message:"Details Updated Successfully!"})
+        }else{
+            return res.status(401).send({error:"User Not Found!"})
+        }
+    }catch(error){
+        return res.status(401).send({error})
+    }
 }
 export async function generateOTP(req, res){
     res.json("GenerateOTP route")
@@ -93,3 +119,25 @@ export async function createResetSession(req, res){
 export async function resetPasswood(req, res){
     res.json("Reset Password route")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
