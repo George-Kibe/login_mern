@@ -14,11 +14,13 @@ async function connect(){
 
 export default connect;
 
-// async function connectOther(){
-//     const mongodb = await MongoMemoryServer.create();
-//     const mongoUri = mongodb.getUri();
+async function connectOther(){
+    const mongodb = await MongoMemoryServer.create();
+    const mongoUri = mongodb.getUri();
+    
+    mongoose.set('strictQuery', false)
+    const db = await mongoose.connect(mongoUri);
+    console.log("Mongo Database Connected!")
+    return db
+}
 
-//     const db = await mongoose.connect(mongoUri);
-//     console.log("Mongo Database Connected!")
-//     return db
-// }
