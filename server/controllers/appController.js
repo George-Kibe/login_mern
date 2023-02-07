@@ -1,6 +1,7 @@
 import UserModel from "../models/UserModel.js"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken';
+import otpGenerator from "otp-generator"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,6 +10,7 @@ dotenv.config();
 export const VerifyUser = async (req, res, next) => {
     try{
         const {username} = req.method == "GET" ? req.query : req.body;
+        if(!username) return res.status(404).send({error:"Username is Required!"});
         //check if user exists
         let exist = await UserModel.findOne({username});
         if(!exist) return res.status(404).send({error:"Cannot find user!"});
@@ -106,12 +108,19 @@ export const updateUser= async (req, res) => {
         return res.status(401).send({error})
     }
 }
-export async function generateOTP(req, res){
-    res.json("GenerateOTP route")
+export const generateOTP= async(req, res) =>{
+    req.app.locals.OTP = await otpGenerator.generate(4,{lowerCaseAlphabets:false, upperCaseAlphabets:false ,specialChars:false})
+    res.status(201).send({code:req.app.locals.OTP})
 }
 
-export async function verifyOTP(req, res){
-    res.json("VERIFY route")
+export const verifyOTP= async(req, res) => {
+    const {code} =req.query;
+    if(parseInt(req.app.locals.OTP) ===parseInt(code)){
+        req.app.locals.OTP =null; //reset otp value
+        req.app.locals.resetSession =true //start session for reset passwood
+        return res.status(201).send({message:"OTP verified successfully"})
+    }
+    return res.status(400).send({error:"Invalid/Expired OTP"})
 }
 export async function createResetSession(req, res){
     res.json("create Reset Session route")
@@ -119,6 +128,10 @@ export async function createResetSession(req, res){
 export async function resetPasswood(req, res){
     res.json("Reset Password route")
 }
+
+
+
+
 
 
 
