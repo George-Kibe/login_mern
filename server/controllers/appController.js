@@ -99,7 +99,7 @@ export const updateUser= async (req, res) => {
             const body = req.body;
             //update the user data
             const updatedUser = await UserModel.updateOne({_id:userId}, body)
-            if(!updateUser) return res.status(500).send({error:"Error in Updating the User Details!"})
+            if(!updatedUser) return res.status(500).send({error:"Error in Updating the User Details!"})
             return res.status(201).send({message:"Details Updated Successfully!"})
         }else{
             return res.status(401).send({error:"User Not Found!"})
@@ -122,11 +122,36 @@ export const verifyOTP= async(req, res) => {
     }
     return res.status(400).send({error:"Invalid/Expired OTP"})
 }
-export async function createResetSession(req, res){
-    res.json("create Reset Session route")
+export const createResetSession = async (req, res) => {
+    if(req.app.locals.resetSession){
+        req.app.locals.resetSession = false; //access this route once
+        return res.status(201).send({message: "Access granted!"})
+    }
+    return res.status(440).send({error: "Session Expired!"})
 }
-export async function resetPasswood(req, res){
-    res.json("Reset Password route")
+export const resetPassword = async(req, res) => {
+    try{
+        if(!req.app.locals.resetSession) return res.status(440).send({error: "Session Expired!"})
+        const {username, password} = req.body;
+        try{
+            const user = await UserModel.findOne({username})
+            if(!user) return res.status(404).send({error:"Username not found!"})
+             //generate encrypted password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt)
+            
+            const updatedUser = await UserModel.updateOne({username:user.username}, {password:hashedPassword})
+            if(!updatedUser) return res.status(500).send({error:"Error in Updating the User Password. Try Again!"})
+            return res.status(201).send({message:"Password Updated Successfully!"})
+
+
+        }catch(error){
+            return res.status(500).send({error})
+        }
+
+    }catch(error){
+        return res.status(401).send({error})
+    }
 }
 
 
