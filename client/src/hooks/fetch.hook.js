@@ -14,7 +14,7 @@ const useFetch = (query) => {
         try{
             setData(prev => ({...prev, isLoading:true}))
             const {data, status} = await axios.get(`/api/${query}`)
-            if(status===201){
+            if(status===200){
                 setData(prev => ({...prev, isLoading:false}))
                 setData(prev => ({...prev, apiData:data, staus:status}))
             }
