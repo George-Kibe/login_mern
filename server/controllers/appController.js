@@ -12,7 +12,7 @@ export const VerifyUser = async (req, res, next) => {
         const {username} = req.method == "GET" ? req.query : req.body;
         if(!username) return res.status(404).send({error:"Username is Required!"});
         //check if user exists
-        let exist = await UserModel.findOne({username});
+        const exist = await UserModel.findOne({username});
         if(!exist) return res.status(404).send({error:"Cannot find user!"});
         next()
 
