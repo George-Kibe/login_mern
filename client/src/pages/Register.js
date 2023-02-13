@@ -29,6 +29,7 @@ const Register = () => {
     const base64 = await convertToBase64(e.target.files[0])
     setFile(base64)
   }
+  console.log(file)
   return (
     <div className='container mx-auto'>
         <Toaster position="top-center" reverseOrder={false}></Toaster>
