@@ -1,14 +1,16 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Avatar from "../assets/profile.png"
-import {Toaster} from "react-hot-toast"
+import toast, {Toaster} from "react-hot-toast"
 import {useFormik} from "formik"
 import { passwordValidate } from '../helpers/validate'
+import { loginUser } from '../helpers/helper'
 import useAuthStore from '../store/store'
 import useFetch from '../hooks/fetch.hook'
 import styles from "../styles/Login.module.css";
 
 const Password = () => {
+  const navigate = useNavigate();
   const username = useAuthStore(state => state.auth.username)
   const [{isLoading, apiData, serverError}] = useFetch(`user/${username}`)
   const formik = useFormik({
@@ -19,10 +21,23 @@ const Password = () => {
     validateOnBlur: false,
     validateOnChange:false,
     onSubmit: async values =>{
-        console.log(values)
+        //console.log(values)
+        let loginPromise = loginUser({ username, password:values.password})
+        toast.promise(loginPromise, {
+            loading: "Validating User!",
+            success: <b>Login Successful!</b>,
+            error: <b>Invalid Password!</b>
+        });
+
+        loginPromise.then(res => {
+            let {token} = res.data;
+            localStorage.setItem("token", token);
+            navigate('/profile')
+        })
     }
   })
-  console.log(isLoading, apiData, serverError)
+
+  //console.log(isLoading, apiData, serverError)
   if(isLoading) return <h2 className='text-2xl font-bold'> Loading...</h2>
   if(serverError) return <h2 className='text-xl text-red-500'>{serverError.message}</h2>
   return (

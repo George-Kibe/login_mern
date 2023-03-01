@@ -1,14 +1,16 @@
 import React, {useState} from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Avatar from "../assets/profile.png"
-import {Toaster} from "react-hot-toast"
+import toast, {Toaster} from "react-hot-toast"
 import {useFormik} from "formik"
 import { registerValidation } from '../helpers/validate'
 import convertToBase64 from '../helpers/convert'
+import { registerUser } from '../helpers/helper'
 
 import styles from "../styles/Login.module.css";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState()
   const formik = useFormik({
     initialValues:{
@@ -22,14 +24,21 @@ const Register = () => {
     onSubmit: async values =>{
         values = await Object.assign(values, {profile:file || " "})
         console.log(values)
+        let registerPromise = registerUser(values)
+        toast.promise(registerPromise, {
+          loading: 'Creating user in Database!',
+          success: <b>User Registration Successful</b>,
+          error: <b>Could Not Register!</b>
+        });
+        registerPromise.then(function(){ navigate('/') })
     }
   })
-  //formik doent support file upload, handles files this way
+  //formik doent support file upload, handle files this way
   const onUpload = async (e) =>{
     const base64 = await convertToBase64(e.target.files[0])
     setFile(base64)
   }
-  console.log(file)
+  //console.log(file)
   return (
     <div className='container mx-auto'>
         <Toaster position="top-center" reverseOrder={false}></Toaster>
