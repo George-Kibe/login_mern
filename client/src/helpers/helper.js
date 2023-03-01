@@ -1,5 +1,16 @@
 //Make API requests
 import axios from "axios"
+import jwt_decode from "jwt-decode"
+
+//get username from Token
+export const getUsername = async () => {
+    const token = localStorage.getItem("token");
+    if(!token) return {error: "Token Not Found or Expired! Login"}
+    const decoded = jwt_decode(token);
+    return decoded;
+    //console.log(decoded)
+}
+
 axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN
 //Authenticate function
 export const authenticate = async(username) => {
