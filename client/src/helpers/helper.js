@@ -22,10 +22,11 @@ export const authenticate = async(username) => {
 }
 
 //Get user details
-export const getUser = async(username) =>{
+export const getUser = async({username}) =>{
     try{
         const {data} = await axios.get(`/api/user/${username}`)
-        return{data};
+        //console.log(data)
+        return {data};
     }catch(error){
         return {error: "Passwords do not Match!"}
     }
@@ -82,7 +83,8 @@ export const generateOTP = async(username) =>{
             const text = `Your Password Recovery OTP is ${code}. Verify and recover your Password.`
             await axios.post('/api/registerMail', {username, userEmail:email, text, subject:"Password Recovery OTP"})
         }
-        return {code}
+
+        return code
     }catch(error){
         return {error}
     }
